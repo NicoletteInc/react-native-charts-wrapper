@@ -495,7 +495,7 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         if self.onSelect == nil {
             return
         } else {
-            self.onSelect!(EntryToDictionaryUtils.entryToDictionary(entry))
+            self.onSelect!(EntryToDictionaryUtils.entryToDictionary(entry, highlight: highlight))
 
         }
     }

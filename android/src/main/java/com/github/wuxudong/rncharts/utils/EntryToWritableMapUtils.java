@@ -10,6 +10,7 @@ import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.data.RadarEntry;
+import com.github.mikephil.charting.highlight.Highlight;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +23,7 @@ import java.util.Map;
  * Helper utilities to convert from Entry to WritableMap
  */
 public final class EntryToWritableMapUtils {
-    public static WritableMap convertEntryToWritableMap(Entry entry) {
+    public static WritableMap convertEntryToWritableMap(Entry entry, Highlight highlight) {
         if(entry == null) {
             return null;
         }
@@ -33,6 +34,9 @@ public final class EntryToWritableMapUtils {
             map.putMap("data", convertMapToWritableMap((Map) entry.getData()));
         }
 
+        map.putDouble("xPx", highlight.getXPx() / 2);
+        map.putDouble("yPx", highlight.getYPx() / 2);
+        
         if (entry instanceof BarEntry) {
             BarEntry barEntry = (BarEntry) entry;
 

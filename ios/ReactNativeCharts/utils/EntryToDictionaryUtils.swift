@@ -11,12 +11,16 @@ import Charts
 import SwiftyJSON
 
 class EntryToDictionaryUtils: NSObject {
-  static func entryToDictionary(_ entry: ChartDataEntry) -> [AnyHashable: Any]{
+    static func entryToDictionary(_ entry: ChartDataEntry, highlight: Highlight) -> [AnyHashable: Any]{
     var dict = [AnyHashable: Any]()
     
     if entry.data != nil {
         dict["data"] = (entry.data as! JSON).dictionaryObject!
     }
+        
+    dict["xPx"] = highlight.xPx
+    dict["yPx"] = highlight.yPx
+    dict["dataSetIndex"] = highlight.dataSetIndex
     
     if entry is BarChartDataEntry {        
         let barEntry = entry as! BarChartDataEntry;

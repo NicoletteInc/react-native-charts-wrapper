@@ -31,7 +31,7 @@ public class RNOnChartValueSelectedListener implements OnChartValueSelectedListe
             reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
                     chart.getId(),
                     "topSelect",
-                    EntryToWritableMapUtils.convertEntryToWritableMap(entry));
+                    EntryToWritableMapUtils.convertEntryToWritableMap(entry, h));
         }
     }
 
