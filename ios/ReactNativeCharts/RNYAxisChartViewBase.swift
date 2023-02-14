@@ -24,10 +24,13 @@ class RNYAxisChartViewBase: RNChartViewBase {
         if config["spaceBottom"].float != nil {
             axis.spaceBottom = CGFloat(config["spaceBottom"].floatValue)
         }
-
-
+        
         if config["position"].string != nil {
             axis.labelPosition = BridgeUtils.parseYAxisLabelPosition(config["position"].stringValue)
+        }
+        
+        if config["xOffset"].float != nil {
+            axis.xOffset = CGFloat(config["xOffset"].floatValue)
         }
 
         // TODO docs says the remaining config needs to be applied before setting data. Test it

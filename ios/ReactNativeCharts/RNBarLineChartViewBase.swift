@@ -101,6 +101,11 @@ class RNBarLineChartViewBase: RNYAxisChartViewBase {
         barLineChart.borderLineWidth = width;
     }
 
+    func setBarRadius(_ radius: CGFloat) {
+        if let roundedBar = barLineChart as? RNRoundedBarChartView {
+            roundedBar.setBarRadius(radius);
+        }
+    }
 
     func setMaxVisibleValueCount(_ count: NSInteger) {
         barLineChart.maxVisibleCount = count;

@@ -18,7 +18,7 @@ public class BarChartManager extends BarLineChartBaseManager<BarChart, BarEntry>
 
     @Override
     protected BarChart createViewInstance(ThemedReactContext reactContext) {
-        BarChart barChart = new BarChart(reactContext);
+        RoundedBarChart barChart = new RoundedBarChart(reactContext);
         barChart.setOnChartValueSelectedListener(new RNOnChartValueSelectedListener(barChart));
         barChart.setOnChartGestureListener(new RNOnChartGestureListener(barChart));
         return barChart;
@@ -27,6 +27,13 @@ public class BarChartManager extends BarLineChartBaseManager<BarChart, BarEntry>
     @Override
     DataExtract getDataExtract() {
         return new BarDataExtract();
+    }
+
+    @ReactProp(name = "barRadius")
+    public void setBarRadius(BarChart chart, int radius) {
+        if(chart instanceof RoundedBarChart){
+            ((RoundedBarChart) chart).setRadius(radius);
+        }
     }
 
     @ReactProp(name = "drawValueAboveBar")

@@ -46,6 +46,10 @@ public abstract class YAxisChartBase<T extends Chart, U extends Entry> extends C
                 axis.setZeroLineColor(zeroLineConfig.getInt("lineColor"));
             }
         }
+
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "xOffset")) {
+            axis.setXOffset((float) propMap.getDouble("xOffset"));
+        }
     }
 
 }
