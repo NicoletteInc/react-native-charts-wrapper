@@ -43,7 +43,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
 
     private typealias Buffer = [CGRect]
     
-    var mRadius = 25.0
+    var mRadius = 0.0
     
     @objc open weak var dataProvider: BarChartDataProvider?
     
