@@ -262,6 +262,29 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         }
     }
 
+    func setSecondXAxis(_ config: NSDictionary) {
+        let json = BridgeUtils.toJson(config)
+
+        if let custom = chart as? LineChartViewCustom {
+
+            let xAxis = custom.secondXAxis;
+
+            setCommonAxisConfig(xAxis, config: json)
+
+            if json["labelRotationAngle"].number != nil {
+                xAxis.labelRotationAngle = CGFloat(truncating: json["labelRotationAngle"].numberValue)
+            }
+
+            if json["avoidFirstLastClipping"].bool != nil {
+                xAxis.avoidFirstLastClippingEnabled = json["avoidFirstLastClipping"].boolValue
+            }
+
+            if json["position"].string != nil {
+                xAxis.labelPosition = BridgeUtils.parseXAxisLabelPosition(json["position"].stringValue)
+            }
+        }
+    }
+
     func setCommonAxisConfig(_ axis: AxisBase, config: JSON) {
 
         // what is drawn
@@ -333,6 +356,27 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
             }
 
             axis.gridLineDashLengths = [lineLength, spaceLength]
+        }
+        
+        if config["axisLineDashedLine"].exists() {
+            let axisLineDashedLine = config["axisLineDashedLine"]
+
+            var lineLength = CGFloat(0)
+            var spaceLength = CGFloat(0)
+
+            if axisLineDashedLine["lineLength"].number != nil {
+                lineLength = CGFloat(truncating: axisLineDashedLine["lineLength"].numberValue)
+            }
+
+            if axisLineDashedLine["spaceLength"].number != nil {
+                spaceLength = CGFloat(truncating: axisLineDashedLine["spaceLength"].numberValue)
+            }
+
+            if axisLineDashedLine["phase"].number != nil {
+                axis.axisLineDashPhase = CGFloat(truncating: axisLineDashedLine["phase"].numberValue)
+            }
+
+            axis.axisLineDashLengths = [lineLength, spaceLength]
         }
 
         // limit lines

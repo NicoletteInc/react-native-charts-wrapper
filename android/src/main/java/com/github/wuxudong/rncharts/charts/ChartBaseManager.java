@@ -401,6 +401,25 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
             axis.enableGridDashedLine(lineLength, spaceLength, phase);
         }
 
+        if (BridgeUtils.validate(propMap, ReadableType.Map, "axisLineDashedLine")) {
+            ReadableMap gridDashedLine = propMap.getMap("axisLineDashedLine");
+            float lineLength = 0;
+            float spaceLength = 0;
+            float phase = 0;
+
+            if (BridgeUtils.validate(gridDashedLine, ReadableType.Number, "lineLength")) {
+                lineLength = (float) gridDashedLine.getDouble("lineLength");
+            }
+            if (BridgeUtils.validate(gridDashedLine, ReadableType.Number, "spaceLength")) {
+                spaceLength = (float) gridDashedLine.getDouble("spaceLength");
+            }
+            if (BridgeUtils.validate(gridDashedLine, ReadableType.Number, "phase")) {
+                phase = (float) gridDashedLine.getDouble("phase");
+            }
+
+            axis.enableAxisLineDashedLine(lineLength, spaceLength, phase);
+        }
+
         // limit lines
         if (BridgeUtils.validate(propMap, ReadableType.Array, "limitLines")) {
             ReadableArray limitLines = propMap.getArray("limitLines");
