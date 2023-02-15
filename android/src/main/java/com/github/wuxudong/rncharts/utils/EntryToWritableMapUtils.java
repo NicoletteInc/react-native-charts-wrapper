@@ -36,6 +36,7 @@ public final class EntryToWritableMapUtils {
 
         map.putDouble("xPx", highlight.getXPx() / 2);
         map.putDouble("yPx", highlight.getYPx() / 2);
+        map.putInt("dataSetIndex", highlight.getDataIndex());
         
         if (entry instanceof BarEntry) {
             BarEntry barEntry = (BarEntry) entry;
