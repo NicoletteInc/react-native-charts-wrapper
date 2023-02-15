@@ -28,6 +28,7 @@ import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RoundedBarChart extends BarChart {
     public RoundedBarChart(Context context) {
@@ -112,7 +113,6 @@ public class RoundedBarChart extends BarChart {
 
         @Override
         public void drawValues(Canvas c) {
-
             // if values are drawn
             if (isDrawingValuesAllowed(mChart)) {
 
@@ -127,8 +127,7 @@ public class RoundedBarChart extends BarChart {
 
                     IBarDataSet dataSet = dataSets.get(i);
 
-                    if (!shouldDrawValues(dataSet))
-                        continue;
+                    if (!shouldDrawValues(dataSet)) continue;
 
                     // apply the text-styling defined by the DataSet
                     applyValueTextStyle(dataSet);
@@ -164,18 +163,27 @@ public class RoundedBarChart extends BarChart {
 
                             float x = (buffer.buffer[j] + buffer.buffer[j + 2]) / 2f;
 
-                            if (!mViewPortHandler.isInBoundsRight(x))
-                                break;
-
-                            if (!mViewPortHandler.isInBoundsY(buffer.buffer[j + 1])
-                                    || !mViewPortHandler.isInBoundsLeft(x))
-                                continue;
+                            if (!mViewPortHandler.isInBoundsRight(x)) break;
+                            if (!mViewPortHandler.isInBoundsLeft(x)) continue;
 
                             BarEntry entry = dataSet.getEntryForIndex(j / 4);
                             float val = entry.getY();
+                            String stringValue = formatter.getBarLabel(entry);
+
+                            if(entry.getData() != null && entry.getData() instanceof Map) {
+                                Map<String, Object> data = (Map<String, Object>) entry.getData();
+                                if (data.get("yLabel") != null && data.get("yLabel") instanceof String) {
+                                    stringValue = (String) data.get("yLabel");
+                                }
+                                if (data.get("yLabelOffset") != null && data.get("yLabelOffset") != null && data.get("yLabelOffset") instanceof Integer) {
+                                    int yLabelOffset = (Integer) data.get("yLabelOffset");
+                                    posOffset = (drawValueAboveBar ? -(valueOffsetPlus + yLabelOffset) : valueTextHeight + valueOffsetPlus + yLabelOffset);
+                                    negOffset = (drawValueAboveBar ? valueTextHeight + valueOffsetPlus + yLabelOffset: -(valueOffsetPlus + yLabelOffset));
+                                }
+                            }
 
                             if (dataSet.isDrawValuesEnabled()) {
-                                drawValue(c, formatter.getBarLabel(entry), x, val >= 0 ?
+                                drawValue(c, stringValue, x, val >= 0 ?
                                                 (buffer.buffer[j + 1] + posOffset) :
                                                 (buffer.buffer[j + 3] + negOffset),
                                         dataSet.getValueTextColor(j / 4));
@@ -225,12 +233,8 @@ public class RoundedBarChart extends BarChart {
                             // in between
                             if (vals == null) {
 
-                                if (!mViewPortHandler.isInBoundsRight(x))
-                                    break;
-
-                                if (!mViewPortHandler.isInBoundsY(buffer.buffer[bufferIndex + 1])
-                                        || !mViewPortHandler.isInBoundsLeft(x))
-                                    continue;
+                                if (!mViewPortHandler.isInBoundsRight(x)) break;
+                                if (!mViewPortHandler.isInBoundsLeft(x)) continue;
 
                                 if (dataSet.isDrawValuesEnabled()) {
                                     drawValue(c, formatter.getBarLabel(entry), x, buffer.buffer[bufferIndex + 1] +
@@ -273,11 +277,10 @@ public class RoundedBarChart extends BarChart {
 
                                     if (value == 0.0f && (posY == 0.0f || negY == 0.0f)) {
                                         // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
-                                        // y = value;
-                                        y = posY + 10;
+                                        y = value;
                                     } else if (value >= 0.0f) {
                                         posY += value;
-                                        y = posY + 10;
+                                        y = posY;
                                     } else {
                                         y = negY;
                                         negY -= value;
@@ -288,17 +291,25 @@ public class RoundedBarChart extends BarChart {
 
                                 trans.pointValuesToPixel(transformed);
 
-                                int drawIndex = 0;
-                                for (float val : vals) {
-                                    drawIndex = val > 0 ? drawIndex + 1 : drawIndex;
-                                }
-
                                 for (int k = 0; k < transformed.length; k += 2) {
+                                    final int stackIndex = k / 2;
+                                    final float val = vals[stackIndex];
+                                    final boolean drawBelow = (val == 0.0f && negY == 0.0f && posY > 0.0f) || val < 0.0f;
 
-                                    final float val = vals[k / 2];
-                                    final boolean drawBelow =
-                                            (val == 0.0f && negY == 0.0f && posY > 0.0f) ||
-                                                    val < 0.0f;
+                                    String stringValue = formatter.getBarStackedLabel(val, entry);
+
+                                    if(entry.getData() != null && entry.getData() instanceof Map) {
+                                        Map<String, Object> data = (Map<String, Object>) entry.getData();
+                                        if (data.get("yLabel") != null && data.get("yLabel") instanceof List) {
+                                            List yLabels = ((List) data.get("yLabel"));
+                                            stringValue = yLabels.size() > stackIndex ? ((String)yLabels.get(stackIndex)) : stringValue;
+                                        }
+                                        if (data.get("yLabelOffset") != null && data.get("yLabelOffset") != null && data.get("yLabelOffset") instanceof Integer) {
+                                            int yLabelOffset = (Integer) data.get("yLabelOffset");
+                                            posOffset = (drawValueAboveBar ? -(valueOffsetPlus + yLabelOffset) : valueTextHeight + valueOffsetPlus + yLabelOffset);
+                                            negOffset = (drawValueAboveBar ? valueTextHeight + valueOffsetPlus + yLabelOffset: -(valueOffsetPlus + yLabelOffset));
+                                        }
+                                    }
 
                                     float y = transformed[k + 1]
                                             + (drawBelow ? negOffset : posOffset);
@@ -309,8 +320,8 @@ public class RoundedBarChart extends BarChart {
                                     if (!mViewPortHandler.isInBoundsLeft(x))
                                         continue;
 
-                                    if (dataSet.isDrawValuesEnabled() && k/2 == vals.length - 1) {
-                                        drawValue(c, formatter.getBarStackedLabel(val, entry), x, y, color);
+                                    if (dataSet.isDrawValuesEnabled()) {
+                                        drawValue(c, stringValue, x, y, color);
                                     }
 
                                     if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
@@ -337,7 +348,6 @@ public class RoundedBarChart extends BarChart {
                 }
             }
         }
-
 
         @Override
         protected void drawDataSet(Canvas c, IBarDataSet dataSet, int index) {

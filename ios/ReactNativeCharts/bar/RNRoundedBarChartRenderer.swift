@@ -12,6 +12,7 @@
 import Foundation
 import CoreGraphics
 import Charts
+import SwiftyJSON
 
 #if !os(OSX)
     import UIKit
@@ -506,22 +507,32 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                         let x = rect.origin.x + rect.size.width / 2.0
                         
                         guard viewPortHandler.isInBoundsRight(x) else { break }
-                        
-                        guard viewPortHandler.isInBoundsY(rect.origin.y),
-                            viewPortHandler.isInBoundsLeft(x)
-                            else { continue }
-                        
+                        guard viewPortHandler.isInBoundsLeft(x) else { continue }
+
                         let val = e.y
+                        
+                        var stringValue = formatter.stringForValue(
+                            val,
+                            entry: e,
+                            dataSetIndex: dataSetIndex,
+                            viewPortHandler: viewPortHandler)
+                        
+                        if let data = e.data as? JSON {
+                            if data["yLabel"].string != nil {
+                                stringValue = data["yLabel"].stringValue
+                            }
+                            if data["yLabelOffset"].float != nil {
+                                let yLabelOffset = CGFloat(data["yLabelOffset"].floatValue)
+                                posOffset = (drawValueAboveBar ? -(valueTextHeight + valueOffsetPlus + yLabelOffset) : valueOffsetPlus + yLabelOffset)
+                                negOffset = (drawValueAboveBar ? valueOffsetPlus + yLabelOffset : -(valueTextHeight + valueOffsetPlus + yLabelOffset))
+                            }
+                        }
                         
                         if dataSet.isDrawValuesEnabled
                         {
                             drawValue(
                                 context: context,
-                                value: formatter.stringForValue(
-                                    val,
-                                    entry: e,
-                                    dataSetIndex: dataSetIndex,
-                                    viewPortHandler: viewPortHandler),
+                                value: stringValue,
                                 xPos: x,
                                 yPos: val >= 0.0
                                     ? (rect.origin.y + posOffset)
@@ -560,9 +571,22 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                     for index in 0 ..< Int(lastIndex)
                     {
                         guard let e = dataSet.entryForIndex(index) as? BarChartDataEntry else { continue }
-                        
+
                         let vals = e.yValues
+                        var yLabelValues: [String]? = nil
+
+                        if let data = e.data as? JSON {
+                            if data["yLabel"].array != nil {
+                                yLabelValues = data["yLabel"].arrayValue.map({ y in y.stringValue })
+                            }
+                            if data["yLabelOffset"].float != nil {
+                                let yLabelOffset = CGFloat(data["yLabelOffset"].floatValue)
+                                posOffset = (drawValueAboveBar ? -(valueTextHeight + valueOffsetPlus + yLabelOffset) : valueOffsetPlus + yLabelOffset)
+                                negOffset = (drawValueAboveBar ? valueOffsetPlus + yLabelOffset : -(valueTextHeight + valueOffsetPlus + yLabelOffset))
+                            }
+                        }
                         
+
                         let rect = buffer[bufferIndex]
                         
                         let x = rect.origin.x + rect.size.width / 2.0
@@ -575,7 +599,6 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
 
                             var posY = 0.0
                             var negY = -e.negativeSum
-                            var lastVisibleIndex = -1
                             var currentIndexValue = -1
 
                             for value in values
@@ -592,7 +615,6 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 {
                                     posY += value
                                     y = posY
-                                    lastVisibleIndex = currentIndexValue
                                 }
                                 else
                                 {
@@ -612,21 +634,26 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 let y = transformed.y + (drawBelow ? negOffset : posOffset)
 
                                 guard viewPortHandler.isInBoundsRight(x) else { break }
-                                guard viewPortHandler.isInBoundsY(y),
-                                    viewPortHandler.isInBoundsLeft(x)
-                                    else { continue }
+                                guard viewPortHandler.isInBoundsLeft(x) else { continue }
 
                                 //index == values.count - 1 is the last stack
                                 //  && index == lastVisibleIndex
                                 if dataSet.isDrawValuesEnabled
                                 {
+                                    var stringValue = formatter.stringForValue(
+                                        value,
+                                        entry: e,
+                                        dataSetIndex: dataSetIndex,
+                                        viewPortHandler: viewPortHandler
+                                    )
+                                    
+                                    if yLabelValues != nil && yLabelValues!.count > index {
+                                        stringValue = yLabelValues![index]
+                                    }
+                                    
                                     drawValue(
                                         context: context,
-                                        value: formatter.stringForValue(
-                                            value,
-                                            entry: e,
-                                            dataSetIndex: dataSetIndex,
-                                            viewPortHandler: viewPortHandler),
+                                        value: stringValue,
                                         xPos: x,
                                         yPos: y,
                                         font: valueFont,
