@@ -390,7 +390,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
             let stackIndex = j % stackSize
             let radius: CGFloat = stackIndex == topIndex ? self.mRadius : 0.0
 
-            let clipPath: CGPath = UIBezierPath(roundedRect: buffer[j], byRoundingCorners: [UIRectCorner.topRight, UIRectCorner.topLeft], cornerRadii: CGSizeMake(radius, radius)).cgPath
+            let clipPath: CGPath = UIBezierPath(roundedRect: buffer[j], byRoundingCorners: [UIRectCorner.topRight, UIRectCorner.topLeft], cornerRadii: CGSize(width: radius, height: radius)).cgPath
 
             context.saveGState()
 
