@@ -575,20 +575,24 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
 
                             var posY = 0.0
                             var negY = -e.negativeSum
+                            var lastVisibleIndex = -1
+                            var currentIndexValue = -1
 
                             for value in values
                             {
                                 let y: Double
+                                currentIndexValue += 1
                                 
                                 if value == 0.0 && (posY == 0.0 || negY == 0.0)
                                 {
                                     // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
-                                    y = posY + 10
+                                    y = value
                                 }
                                 else if value >= 0.0
                                 {
                                     posY += value
                                     y = posY
+                                    lastVisibleIndex = currentIndexValue
                                 }
                                 else
                                 {
@@ -613,6 +617,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                     else { continue }
 
                                 //index == values.count - 1 is the last stack
+                                //  && index == lastVisibleIndex
                                 if dataSet.isDrawValuesEnabled
                                 {
                                     drawValue(
