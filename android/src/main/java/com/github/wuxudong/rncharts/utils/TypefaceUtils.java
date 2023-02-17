@@ -16,12 +16,18 @@ public class TypefaceUtils {
         String fontFamily = propMap.getString("fontFamily");
         boolean italic = false;
         boolean bold = false;
+        int weight = 0;
+
         int style = Typeface.NORMAL;
         if (BridgeUtils.validate(propMap, ReadableType.String, "fontStyle")) {
             italic = "italic".equals(propMap.getString("fontStyle"));
         }
         if (BridgeUtils.validate(propMap, ReadableType.String, "fontWeight")) {
             bold = "bold".equals(propMap.getString("fontWeight"));
+            Integer fontWeight = parseInteger(propMap.getString("fontWeight"));
+            if(fontWeight != null){
+                weight = fontWeight;
+            }
         }
 
         if (italic && bold) {
@@ -30,6 +36,15 @@ public class TypefaceUtils {
             style = Typeface.ITALIC;
         } else if (bold) {
             style = Typeface.BOLD;
+        }
+
+        if(weight > 0){
+           return ReactFontManager.getInstance().getTypeface(
+                    fontFamily,
+                    style,
+                    weight,
+                    chart.getContext().getAssets()
+            );
         }
 
         return getTypeface(chart, fontFamily, style);
@@ -43,5 +58,14 @@ public class TypefaceUtils {
         return ReactFontManager.getInstance().getTypeface(fontFamily,
                 style,
                 chart.getContext().getAssets());
+    }
+
+    public static Integer parseInteger(String input ) {
+        try {
+            return Integer.parseInt(input);
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 }
