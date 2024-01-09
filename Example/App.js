@@ -2,7 +2,7 @@ import "react-native-gesture-handler";
 import React, {Component} from "react";
 import {AppRegistry} from "react-native";
 import {NavigationContainer} from "@react-navigation/native";
-import ChartsListScreen from "./app/ChartsListScreen";
+import DGChartsListScreen from "./app/ChartsListScreen";
 
 const Example = () => (
   <NavigationContainer>
@@ -15,4 +15,3 @@ const Example = () => (
 export default Example;
 
 AppRegistry.registerComponent('Example', () => Example);
-

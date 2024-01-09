@@ -11,7 +11,7 @@
 
 import Foundation
 import CoreGraphics
-import Charts
+import DGCharts
 import SwiftyJSON
 
 #if !os(OSX)
@@ -43,21 +43,21 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
     internal lazy var accessibilityOrderedElements: [[NSUIAccessibilityElement]] = accessibilityCreateEmptyOrderedElements()
 
     private typealias Buffer = [CGRect]
-    
+
     var mRadius = 0.0
-    
+
     @objc open weak var dataProvider: BarChartDataProvider?
-    
+
     @objc public init(dataProvider: BarChartDataProvider, animator: Animator, viewPortHandler: ViewPortHandler)
     {
         super.init(animator: animator, viewPortHandler: viewPortHandler)
-        
+
         self.dataProvider = dataProvider
     }
-    
+
     // [CGRect] per dataset
     private var _buffers = [Buffer]()
-    
+
     open override func initBuffers()
     {
         guard let barData = dataProvider?.barData else { return _buffers.removeAll() }
@@ -83,19 +83,19 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                 : Buffer(repeating: .zero, count: size)
         }
     }
-    
+
     private func prepareBuffer(dataSet: BarChartDataSetProtocol, index: Int)
     {
         guard
             let dataProvider = dataProvider,
             let barData = dataProvider.barData
             else { return }
-        
+
         let barWidthHalf = CGFloat(barData.barWidth / 2.0)
-    
+
         var bufferIndex = 0
         let containsStacks = dataSet.isStacked
-        
+
         let isInverted = dataProvider.isInverted(axis: dataSet.axisDependency)
         let phaseY = CGFloat(animator.phaseY)
 
@@ -114,7 +114,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                 var posY = 0.0
                 var negY = -e.negativeSum
                 var yStart = 0.0
-                
+
                 // fill the stack
                 for value in vals
                 {
@@ -136,14 +136,14 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                         yStart = negY + abs(value)
                         negY += abs(value)
                     }
-                    
+
                     var top = isInverted
                         ? (y <= yStart ? CGFloat(y) : CGFloat(yStart))
                         : (y >= yStart ? CGFloat(y) : CGFloat(yStart))
                     var bottom = isInverted
                         ? (y >= yStart ? CGFloat(y) : CGFloat(yStart))
                         : (y <= yStart ? CGFloat(y) : CGFloat(yStart))
-                    
+
                     // multiply the height of the rect with the phase
                     top *= phaseY
                     bottom *= phaseY
@@ -163,7 +163,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                 var bottom = isInverted
                     ? (y >= 0.0 ? CGFloat(y) : 0)
                     : (y <= 0.0 ? CGFloat(y) : 0)
-                
+
                 /* When drawing each bar, the renderer actually draws each bar from 0 to the required value.
                  * This drawn bar is then clipped to the visible chart rect in BarLineChartViewBase's draw(rect:) using clipDataToContent.
                  * While this works fine when calculating the bar rects for drawing, it causes the accessibilityFrames to be oversized in some cases.
@@ -264,7 +264,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
             let dataProvider = dataProvider,
             let barData = dataProvider.barData
             else { return }
-        
+
         // If we redraw the data, remove and repopulate accessible elements to update label values and frames
         accessibleChartElements.removeAll()
         accessibilityOrderedElements = accessibilityCreateEmptyOrderedElements()
@@ -295,7 +295,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
     }
 
     private var _barShadowRectBuffer: CGRect = CGRect()
-    
+
     @objc open func drawDataSet(context: CGContext, dataSet: BarChartDataSetProtocol, index: Int)
     {
         guard let dataProvider = dataProvider else { return }
@@ -304,19 +304,19 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
 
         prepareBuffer(dataSet: dataSet, index: index)
         trans.rectValuesToPixel(&_buffers[index])
-        
+
         let borderWidth = dataSet.barBorderWidth
         let borderColor = dataSet.barBorderColor
         let drawBorder = borderWidth > 0.0
-        
+
         context.saveGState()
         defer { context.restoreGState() }
-        
+
         // draw the bar shadow before the values
         if dataProvider.isDrawBarShadowEnabled
         {
             guard let barData = dataProvider.barData else { return }
-            
+
             let barWidth = barData.barWidth
             let barWidthHalf = barWidth / 2.0
             var x: Double = 0.0
@@ -325,28 +325,28 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
             for i in range
             {
                 guard let e = dataSet.entryForIndex(i) as? BarChartDataEntry else { continue }
-                
+
                 x = e.x
-                
+
                 _barShadowRectBuffer.origin.x = CGFloat(x - barWidthHalf)
                 _barShadowRectBuffer.size.width = CGFloat(barWidth)
-                
+
                 trans.rectValueToPixel(&_barShadowRectBuffer)
-                
+
                 guard viewPortHandler.isInBoundsLeft(_barShadowRectBuffer.origin.x + _barShadowRectBuffer.size.width) else { continue }
-                
+
                 guard viewPortHandler.isInBoundsRight(_barShadowRectBuffer.origin.x) else { break }
-                
+
                 _barShadowRectBuffer.origin.y = viewPortHandler.contentTop
                 _barShadowRectBuffer.size.height = viewPortHandler.contentHeight
-                
+
                 context.setFillColor(dataSet.barShadowColor.cgColor)
                 context.fill(_barShadowRectBuffer)
             }
         }
 
         let buffer = _buffers[index]
-        
+
         // draw the bar shadow before the values
         if dataProvider.isDrawBarShadowEnabled
         {
@@ -358,14 +358,14 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                 context.fill(barRect)
             }
         }
-        
+
         let isSingleColor = dataSet.colors.count == 1
-        
+
         if isSingleColor
         {
             context.setFillColor(dataSet.color(atIndex: 0).cgColor)
         }
-        
+
         // In case the chart is stacked, we need to accomodate individual bars within accessibilityOrdereredElements
         let isStacked = dataSet.isStacked
         let stackSize = isStacked ? dataSet.stackSize : 1
@@ -373,7 +373,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
         for j in buffer.indices
         {
             let barRect = buffer[j]
-            
+
             guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
             guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
 
@@ -424,7 +424,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
             }
         }
     }
-    
+
     open func prepareBarHighlight(
         x: Double,
           y1: Double,
@@ -437,12 +437,12 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
         let right = x + barWidthHalf
         let top = y1
         let bottom = y2
-        
+
         rect.origin.x = CGFloat(left)
         rect.origin.y = CGFloat(top)
         rect.size.width = CGFloat(right - left)
         rect.size.height = CGFloat(bottom - top)
-        
+
         trans.rectValueToPixel(&rect, phaseY: animator.phaseY )
     }
 
@@ -460,40 +460,40 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
             var posOffset: CGFloat
             var negOffset: CGFloat
             let drawValueAboveBar = dataProvider.isDrawValueAboveBarEnabled
-            
+
             for dataSetIndex in barData.indices
             {
                 guard
                     let dataSet = barData[dataSetIndex] as? BarChartDataSetProtocol,
                     shouldDrawValues(forDataSet: dataSet)
                     else { continue }
-                
+
                 let angleRadians = dataSet.valueLabelAngle * .pi / 180 //.DEG2RAD
 
                 let isInverted = dataProvider.isInverted(axis: dataSet.axisDependency)
-                
+
                 // calculate the correct offset depending on the draw position of the value
                 let valueFont = dataSet.valueFont
                 let valueTextHeight = valueFont.lineHeight
                 posOffset = (drawValueAboveBar ? -(valueTextHeight + valueOffsetPlus) : valueOffsetPlus)
                 negOffset = (drawValueAboveBar ? valueOffsetPlus : -(valueTextHeight + valueOffsetPlus))
-                
+
                 if isInverted
                 {
                     posOffset = -posOffset - valueTextHeight
                     negOffset = -negOffset - valueTextHeight
                 }
-                
+
                 let buffer = _buffers[dataSetIndex]
-                
+
                 let formatter = dataSet.valueFormatter
-                
+
                 let trans = dataProvider.getTransformer(forAxis: dataSet.axisDependency)
-                
+
                 let phaseY = animator.phaseY
-                
+
                 let iconsOffset = dataSet.iconsOffset
-        
+
                 // if only single values are drawn (sum)
                 if !dataSet.isStacked
                 {
@@ -501,22 +501,22 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                     for j in range
                     {
                         guard let e = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
-                        
+
                         let rect = buffer[j]
-                        
+
                         let x = rect.origin.x + rect.size.width / 2.0
-                        
+
                         guard viewPortHandler.isInBoundsRight(x) else { break }
                         guard viewPortHandler.isInBoundsLeft(x) else { continue }
 
                         let val = e.y
-                        
+
                         var stringValue = formatter.stringForValue(
                             val,
                             entry: e,
                             dataSetIndex: dataSetIndex,
                             viewPortHandler: viewPortHandler)
-                        
+
                         if let data = e.data as? JSON {
                             if data["yLabel"].string != nil {
                                 stringValue = data["yLabel"].stringValue
@@ -527,7 +527,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 negOffset = (drawValueAboveBar ? valueOffsetPlus + yLabelOffset : -(valueTextHeight + valueOffsetPlus + yLabelOffset))
                             }
                         }
-                        
+
                         if dataSet.isDrawValuesEnabled
                         {
                             drawValue(
@@ -543,28 +543,28 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 anchor: CGPoint(x: 0.5, y: 0.5),
                                 angleRadians: angleRadians)
                         }
-                        
+
                         if let icon = e.icon, dataSet.isDrawIconsEnabled
                         {
                             var px = x
                             var py = val >= 0.0
                                 ? (rect.origin.y + posOffset)
                                 : (rect.origin.y + rect.size.height + negOffset)
-                            
+
                             px += iconsOffset.x
                             py += iconsOffset.y
-                            
+
                             context.drawImage(icon,
                                               atCenter: CGPoint(x: px, y: py),
                                               size: icon.size)
                         }
-                        
+
                     }
                 }
                 else
                 {
                     // if we have stacks
-                    
+
                     var bufferIndex = 0
                     let lastIndex = ceil(Double(dataSet.entryCount) * animator.phaseX)
 
@@ -585,12 +585,12 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 negOffset = (drawValueAboveBar ? valueOffsetPlus + yLabelOffset : -(valueTextHeight + valueOffsetPlus + yLabelOffset))
                             }
                         }
-                        
+
 
                         let rect = buffer[bufferIndex]
-                        
+
                         let x = rect.origin.x + rect.size.width / 2.0
-                        
+
                         // we still draw stacked bars, but there is one non-stacked in between
                         if let values = vals
                         {
@@ -605,7 +605,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                             {
                                 let y: Double
                                 currentIndexValue += 1
-                                
+
                                 if value == 0.0 && (posY == 0.0 || negY == 0.0)
                                 {
                                     // Take care of the situation of a 0.0 value, which overlaps a non-zero bar
@@ -646,11 +646,11 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                         dataSetIndex: dataSetIndex,
                                         viewPortHandler: viewPortHandler
                                     )
-                                    
+
                                     if yLabelValues != nil && yLabelValues!.count > index {
                                         stringValue = yLabelValues![index]
                                     }
-                                    
+
                                     drawValue(
                                         context: context,
                                         value: stringValue,
@@ -696,16 +696,16 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                     anchor: CGPoint(x: 0.5, y: 0.5),
                                     angleRadians: angleRadians)
                             }
-                            
+
                             if let icon = e.icon, dataSet.isDrawIconsEnabled
                             {
                                 var px = x
                                 var py = rect.origin.y +
                                     (e.y >= 0 ? posOffset : negOffset)
-                                
+
                                 px += iconsOffset.x
                                 py += iconsOffset.y
-                                
+
                                 context.drawImage(icon,
                                                   atCenter: CGPoint(x: px, y: py),
                                                   size: icon.size)
@@ -718,7 +718,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
             }
         }
     }
-    
+
     /// Draws a value at the specified x and y position.
     @objc open func drawValue(context: CGContext, value: String, xPos: CGFloat, yPos: CGFloat, font: NSUIFont, align: TextAlignment, color: NSUIColor, anchor: CGPoint, angleRadians: CGFloat)
     {
@@ -733,44 +733,44 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
         }
     }
 
-    
+
     open override func drawExtras(context: CGContext)
     {
-        
+
     }
-    
+
     open override func drawHighlighted(context: CGContext, indices: [Highlight])
     {
         guard
             let dataProvider = dataProvider,
             let barData = dataProvider.barData
             else { return }
-        
+
         context.saveGState()
         defer { context.restoreGState() }
         var barRect = CGRect()
-        
+
         for high in indices
         {
             guard
                 let set = barData[high.dataSetIndex] as? BarChartDataSetProtocol,
                 set.isHighlightEnabled
                 else { continue }
-            
+
             if let e = set.entryForXValue(high.x, closestToY: high.y) as? BarChartDataEntry
             {
                 guard isInBoundsX(entry: e, dataSet: set) else { continue }
-                
+
                 let trans = dataProvider.getTransformer(forAxis: set.axisDependency)
-                
+
                 context.setFillColor(set.highlightColor.cgColor)
                 context.setAlpha(set.highlightAlpha)
-                
+
                 let isStack = high.stackIndex >= 0 && e.isStacked
-                
+
                 let y1: Double
                 let y2: Double
-                
+
                 if isStack
                 {
                     if dataProvider.isHighlightFullBarEnabled
@@ -781,7 +781,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                     else
                     {
                         let range = e.ranges?[high.stackIndex]
-                        
+
                         y1 = range?.from ?? 0.0
                         y2 = range?.to ?? 0.0
                     }
@@ -791,11 +791,11 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                     y1 = e.y
                     y2 = 0.0
                 }
-                
+
                 prepareBarHighlight(x: e.x, y1: y1, y2: y2, barWidthHalf: barData.barWidth / 2.0, trans: trans, rect: &barRect)
-                
+
                 setHighlightDrawPos(highlight: high, barRect: barRect)
-                
+
                 context.fill(barRect)
             }
         }
@@ -858,7 +858,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
             } else {
                 stackLabel = nil
             }
-            
+
             //Handles empty array of yValues
             let yValue = vals.isEmpty ? 0.0 : vals[idx % vals.count]
 

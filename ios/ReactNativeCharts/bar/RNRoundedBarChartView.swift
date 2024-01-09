@@ -11,7 +11,7 @@
 
 import Foundation
 import CoreGraphics
-import Charts
+import DGCharts
 
 /// Chart that draws bars.
 open class RNRoundedBarChartView: BarChartView
@@ -21,13 +21,13 @@ open class RNRoundedBarChartView: BarChartView
         super.init(frame: frame)
         initialize()
     }
-    
+
     public required init?(coder aDecoder: NSCoder)
     {
         super.init(coder: aDecoder)
         initialize()
     }
-    
+
     internal func initialize()
     {
         renderer = RNRoundedBarChartRenderer(dataProvider: self, animator: chartAnimator, viewPortHandler: viewPortHandler)
@@ -37,7 +37,7 @@ open class RNRoundedBarChartView: BarChartView
         self.xAxis.spaceMin = 0.5
         self.xAxis.spaceMax = 0.5
     }
-    
+
     func setBarRadius(_ radius: CGFloat){
         let customRenderer = renderer as! RNRoundedBarChartRenderer
         customRenderer.mRadius = radius

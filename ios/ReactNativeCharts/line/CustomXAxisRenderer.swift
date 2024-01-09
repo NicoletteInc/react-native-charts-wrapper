@@ -11,7 +11,7 @@
 
 import Foundation
 import CoreGraphics
-import Charts
+import DGCharts
 
 open class CustomXAxisRenderer: XAxisRenderer
 {
@@ -19,10 +19,10 @@ open class CustomXAxisRenderer: XAxisRenderer
     @objc open override func drawLabels(context: CGContext, pos: CGFloat, anchor: CGPoint)
     {
         guard let transformer = self.transformer else { return }
-        
+
         let paraStyle = ParagraphStyle.default.mutableCopy() as! MutableParagraphStyle
         paraStyle.alignment = .center
-        
+
         let labelAttrs: [NSAttributedString.Key : Any] = [.font: axis.labelFont,
                                                          .foregroundColor: axis.labelTextColor,
                                                          .paragraphStyle: paraStyle,
@@ -34,14 +34,14 @@ open class CustomXAxisRenderer: XAxisRenderer
 
         var position = CGPoint.zero
         var labelMaxSize = CGSize.zero
-        
+
         if axis.isWordWrapEnabled
         {
             labelMaxSize.width = axis.wordWrapWidthPercent * valueToPixelMatrix.a
         }
-        
+
         let entries = axis.entries
-        
+
         for i in entries.indices
         {
             let px = isCenteringEnabled ? CGFloat(axis.centeredEntries[i]) : CGFloat(entries[i])
@@ -49,7 +49,7 @@ open class CustomXAxisRenderer: XAxisRenderer
                 .applying(valueToPixelMatrix)
 
             guard viewPortHandler.isInBoundsX(position.x) else { continue }
-            
+
             let tickIndex = axis.entries[i]
             let distance = axis.entries.count > 1 ? axis.entries[1] - axis.entries[0] : 1
 
@@ -69,7 +69,7 @@ open class CustomXAxisRenderer: XAxisRenderer
                 if i == axis.entryCount - 1 && axis.entryCount > 1
                 {
                     let width = labelns.boundingRect(with: labelMaxSize, options: .usesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
-                    
+
                     if width > viewPortHandler.offsetRight * 2.0,
                         position.x + width > viewPortHandler.chartWidth
                     {
@@ -82,7 +82,7 @@ open class CustomXAxisRenderer: XAxisRenderer
                     position.x += width / 2.0
                 }
             }
-            
+
             drawLabel(context: context,
                       formattedLabel: label,
                       x: position.x,
@@ -93,5 +93,5 @@ open class CustomXAxisRenderer: XAxisRenderer
                       angleRadians: labelRotationAngleRadians)
         }
     }
-    
+
 }

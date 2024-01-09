@@ -11,13 +11,13 @@
 
 import Foundation
 import CoreGraphics
-import Charts
+import DGCharts
 
 @objc(RNBarLineScatterCandleBubbleRenderer)
 open class RNBarLineScatterCandleBubbleRenderer: BarLineScatterCandleBubbleRenderer
 {
     internal var _xBounds = XBounds() // Reusable XBounds object
-    
+
     public override init(animator: Animator, viewPortHandler: ViewPortHandler)
     {
         super.init(animator: animator, viewPortHandler: viewPortHandler)
@@ -38,7 +38,7 @@ open class RNBarLineScatterCandleBubbleRenderer: BarLineScatterCandleBubbleRende
     {
         return XBounds(chart: chart, dataSet: dataSet, animator: animator)
     }
-    
+
     /// - Returns: `true` if the DataSet values should be drawn, `false` if not.
     internal func shouldDrawValues(forDataSet set: ChartDataSetProtocol) -> Bool
     {

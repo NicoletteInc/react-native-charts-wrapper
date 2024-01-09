@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import Charts
+import DGCharts
 import SwiftyJSON
 
 class RNYAxisChartViewBase: RNChartViewBase {
@@ -24,11 +24,11 @@ class RNYAxisChartViewBase: RNChartViewBase {
         if config["spaceBottom"].float != nil {
             axis.spaceBottom = CGFloat(config["spaceBottom"].floatValue)
         }
-        
+
         if config["position"].string != nil {
             axis.labelPosition = BridgeUtils.parseYAxisLabelPosition(config["position"].stringValue)
         }
-        
+
         if config["xOffset"].float != nil {
             axis.xOffset = CGFloat(config["xOffset"].floatValue)
         }
