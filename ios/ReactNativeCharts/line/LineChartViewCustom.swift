@@ -45,6 +45,10 @@ open class LineChartViewCustom: LineChartView
         _secondAxisTransformer = Transformer(viewPortHandler: viewPortHandler)
     }
 
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+    }
+
     @objc open override func setViewPortOffsets(left: CGFloat, top: CGFloat, right: CGFloat, bottom: CGFloat)
     {
         super.setViewPortOffsets(left: left, top: top, right: right, bottom: bottom)
