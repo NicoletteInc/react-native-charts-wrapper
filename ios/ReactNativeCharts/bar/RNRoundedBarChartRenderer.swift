@@ -527,19 +527,19 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 negOffset = (drawValueAboveBar ? valueOffsetPlus + yLabelOffset : -(valueTextHeight + valueOffsetPlus + yLabelOffset))
                             }
                         }
+                        
+                        let y: CGFloat
+
+                        if val < 8.0 {
+                            // Draw label above the bar
+                            y = rect.origin.y - valueTextHeight
+                        } else {
+                            // Regular positioning
+                            y = rect.origin.y + (val >= 0 ? posOffset : negOffset)
+                        }
 
                         if dataSet.isDrawValuesEnabled
                         {
-                            let minLabelHeight: CGFloat = 8.0
-                            let barHeight = abs(buffer[j].height)
-                            var y: CGFloat
-                            if abs(val) < minLabelHeight {
-                                // Draw label outside (above or below) for small values
-                                y = drawValueAboveBar ? (rect.origin.y + posOffset + valueOffsetPlus * 2) : (rect.origin.y + rect.size.height + negOffset - valueOffsetPlus * 2)
-                            } else {
-                                // Normal positioning
-                                y = rect.origin.y + (val >= 0 ? posOffset : negOffset)
-                            }
                             drawValue(
                                 context: context,
                                 value: stringValue,
@@ -547,7 +547,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 yPos: y,
                                 font: valueFont,
                                 align: .center,
-                                color: dataSet.valueTextColorAt(j),
+                                color: NSUIColor.black,
                                 anchor: CGPoint(x: 0.5, y: 0.5),
                                 angleRadians: angleRadians)
                         }
@@ -642,12 +642,12 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 let minLabelHeight: CGFloat = 8.0
                                 let barHeight = abs(buffer[bufferIndex].height)
                                 var y: CGFloat
-                                if abs(value) < minLabelHeight {
-                                    // Draw label outside (above or below) for small values
-                                    y = drawBelow ? (transformed.y + valueOffsetPlus * 2) : (transformed.y - valueOffsetPlus * 2)
+                                if value < 8.0 {
+                                    // Draw label above the bar
+                                    y = rect.origin.y - valueTextHeight
                                 } else {
-                                    // Normal positioning
-                                    y = transformed.y + (drawBelow ? negOffset : posOffset)
+                                    // Regular positioning
+                                    y = rect.origin.y + (value >= 0 ? posOffset : negOffset)
                                 }
 
                                 guard viewPortHandler.isInBoundsRight(x) else { break }
@@ -675,7 +675,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                         yPos: y,
                                         font: valueFont,
                                         align: .center,
-                                        color: dataSet.valueTextColorAt(index),
+                                        color: NSUIColor.black,
                                         anchor: CGPoint(x: 0.5, y: 0.5),
                                         angleRadians: angleRadians)
                                 }
@@ -709,7 +709,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                         (e.y >= 0 ? posOffset : negOffset),
                                     font: valueFont,
                                     align: .center,
-                                    color: dataSet.valueTextColorAt(index),
+                                    color: NSUIColor.black,
                                     anchor: CGPoint(x: 0.5, y: 0.5),
                                     angleRadians: angleRadians)
                             }

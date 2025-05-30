@@ -187,12 +187,11 @@ public class RoundedBarChart extends BarChart {
                             float barBottom = buffer.buffer[j + 3];
                             float barHeight = Math.abs(barBottom - barTop);
                             float labelY;
-                            final float MIN_LABEL_HEIGHT_PX = 12f; // threshold for label above bar
-                            if (val > 0 && barHeight < MIN_LABEL_HEIGHT_PX) {
+                            if (val < 7.0f) {
                                 // Draw label above the bar
                                 labelY = barTop - valueTextHeight;
                             } else {
-                                // Default behavior
+                                // Regular positioning
                                 labelY = val >= 0 ? (barTop + posOffset) : (barBottom + negOffset);
                             }
 
@@ -242,8 +241,8 @@ public class RoundedBarChart extends BarChart {
                             // in between
                             if (vals == null) {
 
-//                                if (!mViewPortHandler.isInBoundsRight(x)) break;
-//                                if (!mViewPortHandler.isInBoundsLeft(x)) continue;
+                               if (!mViewPortHandler.isInBoundsRight(x)) break;
+                               if (!mViewPortHandler.isInBoundsLeft(x)) continue;
 
                                 if (dataSet.isDrawValuesEnabled()) {
                                     drawValue(c, formatter.getBarLabel(entry), x, buffer.buffer[bufferIndex + 1] +
@@ -322,11 +321,11 @@ public class RoundedBarChart extends BarChart {
 
                                     float y;
 
-                                    if (Math.abs(val) < 8.0f) {
-                                        // Draw label outside (above or below) for small values
-                                        y = drawBelow ? (transformed[k + 1] + valueOffsetPlus * 2) : (transformed[k + 1] - valueOffsetPlus * 2);
+                                    if (val < 7.0f) {
+                                        // Draw label above the bar
+                                        y = buffer.buffer[bufferIndex + 1] - valueTextHeight;
                                     } else {
-                                        // Normal positioning
+                                        // Regular positioning
                                         y = transformed[k + 1] + (drawBelow ? negOffset : posOffset);
                                     }
 
