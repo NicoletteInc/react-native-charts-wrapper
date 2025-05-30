@@ -530,13 +530,21 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
 
                         if dataSet.isDrawValuesEnabled
                         {
+                            let minLabelHeight: CGFloat = 8.0
+                            let barHeight = abs(buffer[j].height)
+                            var y: CGFloat
+                            if abs(val) < minLabelHeight {
+                                // Draw label outside (above or below) for small values
+                                y = drawValueAboveBar ? (rect.origin.y + posOffset + valueOffsetPlus * 2) : (rect.origin.y + rect.size.height + negOffset - valueOffsetPlus * 2)
+                            } else {
+                                // Normal positioning
+                                y = rect.origin.y + (val >= 0 ? posOffset : negOffset)
+                            }
                             drawValue(
                                 context: context,
                                 value: stringValue,
                                 xPos: x,
-                                yPos: val >= 0.0
-                                    ? (rect.origin.y + posOffset)
-                                    : (rect.origin.y + rect.size.height + negOffset),
+                                yPos: y,
                                 font: valueFont,
                                 align: .center,
                                 color: dataSet.valueTextColorAt(j),
@@ -631,7 +639,16 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                             {
                                 index = index + 1
                                 let drawBelow = (value == 0.0 && negY == 0.0 && posY > 0.0) || value < 0.0
-                                let y = transformed.y + (drawBelow ? negOffset : posOffset)
+                                let minLabelHeight: CGFloat = 8.0
+                                let barHeight = abs(buffer[bufferIndex].height)
+                                var y: CGFloat
+                                if abs(value) < minLabelHeight {
+                                    // Draw label outside (above or below) for small values
+                                    y = drawBelow ? (transformed.y + valueOffsetPlus * 2) : (transformed.y - valueOffsetPlus * 2)
+                                } else {
+                                    // Normal positioning
+                                    y = transformed.y + (drawBelow ? negOffset : posOffset)
+                                }
 
                                 guard viewPortHandler.isInBoundsRight(x) else { break }
                                 guard viewPortHandler.isInBoundsLeft(x) else { continue }
