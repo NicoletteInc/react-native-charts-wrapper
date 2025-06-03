@@ -529,13 +529,16 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                         }
                         
                         let y: CGFloat
+                        let labelColor: NSUIColor
 
                         if val < 8.0 {
-                            // Draw label above the bar
-                            y = rect.origin.y - valueTextHeight
+                            // Draw label above the bar with dark pink color
+                            y = rect.origin.y - valueTextHeight;
+                            labelColor = NSUIColor(red: 194/255.0, green: 24/255.0, blue: 91/255.0, alpha: 1.0) // #C2185B
                         } else {
-                            // Regular positioning
-                            y = rect.origin.y + (val >= 0 ? posOffset : negOffset)
+                            // Regular positioning and color
+                            y = rect.origin.y + (val >= 0 ? posOffset : negOffset);
+                            labelColor = dataSet.valueTextColorAt(j);
                         }
 
                         if dataSet.isDrawValuesEnabled
@@ -547,7 +550,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 yPos: y,
                                 font: valueFont,
                                 align: .center,
-                                color: NSUIColor.black,
+                                color: labelColor,
                                 anchor: CGPoint(x: 0.5, y: 0.5),
                                 angleRadians: angleRadians)
                         }
@@ -642,12 +645,15 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 let minLabelHeight: CGFloat = 8.0
                                 let barHeight = abs(buffer[bufferIndex].height)
                                 var y: CGFloat
+                                let labelColor: NSUIColor
                                 if value < 8.0 {
-                                    // Draw label above the bar
-                                    y = rect.origin.y - valueTextHeight
+                                    // Draw label above the bar with dark pink color
+                                    y = rect.origin.y - valueTextHeight;
+                                    labelColor = NSUIColor(red: 194/255.0, green: 24/255.0, blue: 91/255.0, alpha: 1.0) // #C2185B
                                 } else {
-                                    // Regular positioning
-                                    y = rect.origin.y + (value >= 0 ? posOffset : negOffset)
+                                    // Regular positioning and color
+                                    y = rect.origin.y + (value >= 0 ? posOffset : negOffset);
+                                    labelColor = value < 8.0 ? NSUIColor(red: 194/255.0, green: 24/255.0, blue: 91/255.0, alpha: 1.0) : dataSet.valueTextColorAt(index);
                                 }
 
                                 guard viewPortHandler.isInBoundsRight(x) else { break }
@@ -675,7 +681,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                         yPos: y,
                                         font: valueFont,
                                         align: .center,
-                                        color: NSUIColor.black,
+                                        color: labelColor,
                                         anchor: CGPoint(x: 0.5, y: 0.5),
                                         angleRadians: angleRadians)
                                 }
@@ -709,7 +715,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                         (e.y >= 0 ? posOffset : negOffset),
                                     font: valueFont,
                                     align: .center,
-                                    color: NSUIColor.black,
+                                    color: dataSet.valueTextColorAt(index),
                                     anchor: CGPoint(x: 0.5, y: 0.5),
                                     angleRadians: angleRadians)
                             }

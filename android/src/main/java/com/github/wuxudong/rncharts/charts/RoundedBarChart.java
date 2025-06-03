@@ -3,6 +3,7 @@ package com.github.wuxudong.rncharts.charts;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -319,14 +320,16 @@ public class RoundedBarChart extends BarChart {
                                         }
                                     }
 
+                                    int labelColor;
                                     float y;
-
                                     if (val < 7.0f) {
-                                        // Draw label above the bar
+                                        // Draw label above the bar with dark pink color
                                         y = buffer.buffer[bufferIndex + 1] - valueTextHeight;
+                                        labelColor = Color.parseColor("#C2185B");
                                     } else {
-                                        // Regular positioning
+                                        // Regular positioning and color
                                         y = transformed[k + 1] + (drawBelow ? negOffset : posOffset);
+                                        labelColor = dataSet.getValueTextColor(index);
                                     }
 
                                     if (!mViewPortHandler.isInBoundsRight(x))
@@ -336,7 +339,7 @@ public class RoundedBarChart extends BarChart {
                                         continue;
 
                                     if (dataSet.isDrawValuesEnabled()) {
-                                        drawValue(c, stringValue, x, y, color);
+                                        drawValue(c, stringValue, x, y, labelColor);
                                     }
 
                                     if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
