@@ -527,6 +527,19 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 negOffset = (drawValueAboveBar ? valueOffsetPlus + yLabelOffset : -(valueTextHeight + valueOffsetPlus + yLabelOffset))
                             }
                         }
+                        
+                        let y: CGFloat
+                        let labelColor: NSUIColor
+
+                        if val < 8.0 {
+                            // Draw label above the bar with dark pink color
+                            y = rect.origin.y - valueTextHeight;
+                            labelColor = NSUIColor(red: 194/255.0, green: 24/255.0, blue: 91/255.0, alpha: 1.0) // #C2185B
+                        } else {
+                            // Regular positioning and color
+                            y = rect.origin.y + (val >= 0 ? posOffset : negOffset);
+                            labelColor = dataSet.valueTextColorAt(j);
+                        }
 
                         if dataSet.isDrawValuesEnabled
                         {
@@ -534,12 +547,10 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                 context: context,
                                 value: stringValue,
                                 xPos: x,
-                                yPos: val >= 0.0
-                                    ? (rect.origin.y + posOffset)
-                                    : (rect.origin.y + rect.size.height + negOffset),
+                                yPos: y,
                                 font: valueFont,
                                 align: .center,
-                                color: dataSet.valueTextColorAt(j),
+                                color: labelColor,
                                 anchor: CGPoint(x: 0.5, y: 0.5),
                                 angleRadians: angleRadians)
                         }
@@ -631,7 +642,19 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                             {
                                 index = index + 1
                                 let drawBelow = (value == 0.0 && negY == 0.0 && posY > 0.0) || value < 0.0
-                                let y = transformed.y + (drawBelow ? negOffset : posOffset)
+                                let minLabelHeight: CGFloat = 8.0
+                                let barHeight = abs(buffer[bufferIndex].height)
+                                var y: CGFloat
+                                let labelColor: NSUIColor
+                                if value < 8.0 {
+                                    // Draw label above the bar with dark pink color
+                                    y = rect.origin.y - valueTextHeight;
+                                    labelColor = NSUIColor(red: 194/255.0, green: 24/255.0, blue: 91/255.0, alpha: 1.0) // #C2185B
+                                } else {
+                                    // Regular positioning and color
+                                    y = rect.origin.y + (value >= 0 ? posOffset : negOffset);
+                                    labelColor = value < 8.0 ? NSUIColor(red: 194/255.0, green: 24/255.0, blue: 91/255.0, alpha: 1.0) : dataSet.valueTextColorAt(index);
+                                }
 
                                 guard viewPortHandler.isInBoundsRight(x) else { break }
                                 guard viewPortHandler.isInBoundsLeft(x) else { continue }
@@ -658,7 +681,7 @@ open class RNRoundedBarChartRenderer: RNBarLineScatterCandleBubbleRenderer
                                         yPos: y,
                                         font: valueFont,
                                         align: .center,
-                                        color: dataSet.valueTextColorAt(index),
+                                        color: labelColor,
                                         anchor: CGPoint(x: 0.5, y: 0.5),
                                         angleRadians: angleRadians)
                                 }

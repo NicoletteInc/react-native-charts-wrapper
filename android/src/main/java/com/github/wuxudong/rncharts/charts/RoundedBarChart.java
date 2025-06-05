@@ -3,6 +3,7 @@ package com.github.wuxudong.rncharts.charts;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -182,11 +183,21 @@ public class RoundedBarChart extends BarChart {
                                 }
                             }
 
+                            // Patch: Always show label above bar for small bars (positive values only)
+                            float barTop = buffer.buffer[j + 1];
+                            float barBottom = buffer.buffer[j + 3];
+                            float barHeight = Math.abs(barBottom - barTop);
+                            float labelY;
+                            if (val < 7.0f) {
+                                // Draw label above the bar
+                                labelY = barTop - valueTextHeight;
+                            } else {
+                                // Regular positioning
+                                labelY = val >= 0 ? (barTop + posOffset) : (barBottom + negOffset);
+                            }
+
                             if (dataSet.isDrawValuesEnabled()) {
-                                drawValue(c, stringValue, x, val >= 0 ?
-                                                (buffer.buffer[j + 1] + posOffset) :
-                                                (buffer.buffer[j + 3] + negOffset),
-                                        dataSet.getValueTextColor(j / 4));
+                                drawValue(c, stringValue, x, labelY, dataSet.getValueTextColor(j / 4));
                             }
 
                             if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
@@ -194,9 +205,7 @@ public class RoundedBarChart extends BarChart {
                                 Drawable icon = entry.getIcon();
 
                                 float px = x;
-                                float py = val >= 0 ?
-                                        (buffer.buffer[j + 1] + posOffset) :
-                                        (buffer.buffer[j + 3] + negOffset);
+                                float py = labelY;
 
                                 px += iconsOffset.x;
                                 py += iconsOffset.y;
@@ -233,8 +242,8 @@ public class RoundedBarChart extends BarChart {
                             // in between
                             if (vals == null) {
 
-                                if (!mViewPortHandler.isInBoundsRight(x)) break;
-                                if (!mViewPortHandler.isInBoundsLeft(x)) continue;
+                               if (!mViewPortHandler.isInBoundsRight(x)) break;
+                               if (!mViewPortHandler.isInBoundsLeft(x)) continue;
 
                                 if (dataSet.isDrawValuesEnabled()) {
                                     drawValue(c, formatter.getBarLabel(entry), x, buffer.buffer[bufferIndex + 1] +
@@ -311,8 +320,17 @@ public class RoundedBarChart extends BarChart {
                                         }
                                     }
 
-                                    float y = transformed[k + 1]
-                                            + (drawBelow ? negOffset : posOffset);
+                                    int labelColor;
+                                    float y;
+                                    if (val < 7.0f) {
+                                        // Draw label above the bar with dark pink color
+                                        y = buffer.buffer[bufferIndex + 1] - valueTextHeight;
+                                        labelColor = Color.parseColor("#C2185B");
+                                    } else {
+                                        // Regular positioning and color
+                                        y = transformed[k + 1] + (drawBelow ? negOffset : posOffset);
+                                        labelColor = dataSet.getValueTextColor(index);
+                                    }
 
                                     if (!mViewPortHandler.isInBoundsRight(x))
                                         break;
@@ -321,7 +339,7 @@ public class RoundedBarChart extends BarChart {
                                         continue;
 
                                     if (dataSet.isDrawValuesEnabled()) {
-                                        drawValue(c, stringValue, x, y, color);
+                                        drawValue(c, stringValue, x, y, labelColor);
                                     }
 
                                     if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
@@ -352,6 +370,7 @@ public class RoundedBarChart extends BarChart {
         @Override
         protected void drawDataSet(Canvas c, IBarDataSet dataSet, int index) {
 
+            final float MIN_BAR_HEIGHT_PX = 6f; // Minimum bar height in pixels
             Transformer trans = mChart.getTransformer(dataSet.getAxisDependency());
 
             mShadowPaint.setColor(dataSet.getBarShadowColor());
@@ -391,14 +410,19 @@ public class RoundedBarChart extends BarChart {
                                     mViewPortHandler.contentBottom(), mShadowPaint);
                     }
 
-
-                    // Set the color for the currently drawn value. If the index
-                    // is
-                    // out of bounds, reuse colors.
                     int _mRadius = mRadius;
                     int entryIndex = dataSet.isStacked() ? ( j / 4) / dataSet.getStackSize() :  j / 4;
                     int stackIndex = (j / 4) % dataSet.getStackSize();
                     BarEntry e = dataSet.getEntryForIndex(entryIndex);
+                    float top = buffer.buffer[j + 1];
+                    float bottom = buffer.buffer[j + 3];
+                    float height = Math.abs(bottom - top);
+                    // Only patch for positive values (bar goes up)
+                    if (e.getY() > 0 && height < MIN_BAR_HEIGHT_PX) {
+                        // For positive bars, top is above bottom (smaller y is higher on screen)
+                        top = bottom - MIN_BAR_HEIGHT_PX;
+                        buffer.buffer[j + 1] = top;
+                    }
                     RectF rect = new RectF(buffer.buffer[j], buffer.buffer[j + 1], buffer.buffer[j + 2], buffer.buffer[j + 3]);
 
                     int drawIndex = -1;
@@ -437,6 +461,16 @@ public class RoundedBarChart extends BarChart {
                         else
                             c.drawRect(buffer.buffer[j], buffer.buffer[j + 1], buffer.buffer[j + 2],
                                     buffer.buffer[j + 3], mRenderPaint);
+                    }
+
+                    float top = buffer.buffer[j + 1];
+                    float bottom = buffer.buffer[j + 3];
+                    float height = Math.abs(bottom - top);
+                    // Only patch for positive values (bar goes up)
+                    BarEntry e = dataSet.getEntryForIndex(j / 4);
+                    if (e.getY() > 0 && height < MIN_BAR_HEIGHT_PX) {
+                        top = bottom - MIN_BAR_HEIGHT_PX;
+                        buffer.buffer[j + 1] = top;
                     }
 
                     if (mRadius > 0)
