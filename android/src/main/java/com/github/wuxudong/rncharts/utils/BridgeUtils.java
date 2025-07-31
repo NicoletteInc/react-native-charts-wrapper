@@ -19,7 +19,6 @@ public class BridgeUtils {
             }
             else {
                 // If it's not a number default to 0 to prevent crashes
-                String type = readableArray.getType(i).name();
                 array[i] = 0;
             }
         }
