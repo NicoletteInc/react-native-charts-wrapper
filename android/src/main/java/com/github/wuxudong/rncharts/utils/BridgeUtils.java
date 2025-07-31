@@ -14,10 +14,13 @@ public class BridgeUtils {
         int[] array = new int[readableArray.size()];
 
         for (int i = 0; i < readableArray.size(); i++) {
-            if (!ReadableType.Number.equals(readableArray.getType(i))) {
-                throw new IllegalArgumentException("Expecting array of numbers");
+            if (ReadableType.Number.equals(readableArray.getType(i))) {
+                 array[i] = readableArray.getInt(i);
             }
-            array[i] = readableArray.getInt(i);
+            else {
+                // If it's not a number default to 0 to prevent crashes
+                array[i] = 0;
+            }
         }
 
         return array;
@@ -27,10 +30,13 @@ public class BridgeUtils {
         float[] array = new float[readableArray.size()];
 
         for (int i = 0; i < readableArray.size(); i++) {
-            if (!ReadableType.Number.equals(readableArray.getType(i))) {
-                throw new IllegalArgumentException("Expecting array of numbers");
+            if (ReadableType.Number.equals(readableArray.getType(i))) {
+                array[i] = (float) readableArray.getDouble(i);
             }
-            array[i] = (float) readableArray.getDouble(i);
+            else {
+                // If it's not a number default to 0 to prevent crashes
+                array[i] = 0f;
+            }
         }
 
         return array;
